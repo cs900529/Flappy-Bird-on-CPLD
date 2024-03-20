@@ -1,0 +1,91 @@
+module final (clk, clk20, reset, fly, segout, scanout);
+
+input clk, clk20, reset, fly,;
+output reg[7:0] segout;
+output reg[2:0] scanout;
+
+reg[25:0] cnt_scan;
+reg[15:0] cnt_clk2;
+
+reg[2:0] x=1, y=2;
+reg[2:0] birdY;
+reg[7:0] wallX;
+reg[7:0] wallY;
+
+reg clk1;
+reg [63:0] q ;
+
+//------------------ clock running -----------------------
+always@(posedge clk)
+begin
+	cnt_scan <= cnt_scan + 1;
+	if (cnt_scan == 6250000) begin
+		cnt_scan <= 0;
+		clk1 = ~clk1;
+	end
+end
+
+always@(posedge clk20)
+begin
+	cnt_clk2 <= cnt_clk2 + 1;
+end
+
+//---------modify display digit ----------
+always @(posedge clk1 , negedge reset)
+begin
+	if (reset == 0) begin
+		for(i = 0;i < 8; i = i + 1) begin
+			wallX[i] = 0;
+			wallY[i] = 0;
+		end
+	q = 64'b11111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111;
+	q[x + 8 * y];
+	end
+end
+
+
+//-----------scan and display 7-SEG-------------
+
+always@(cnt_scan[15:13])
+begin
+	scanout <= cnt_scan[15:13];
+end
+
+always@(scanout) 
+begin
+	case(scanout)
+	7:
+		segout=q[63:56];
+	6:
+		segout=q[55:48];
+	5:
+		segout=q[47:40];
+	4:
+		segout=q[39:32];
+	3:
+		segout=q[31:24];
+	2:
+		segout=q[23:16];
+	1:
+		segout=q[15:8];
+	0:
+		segout=q[7:0];
+	default:
+		segout=8'b11111111;
+	endcase
+end
+
+endmodule
+
+
+
+
+
+
+
+
+
+
+
+
+
